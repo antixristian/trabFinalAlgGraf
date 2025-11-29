@@ -3,7 +3,8 @@ from pydantic import BaseModel
 import app.database.connection as db
 
 router = APIRouter()
-class node(BaseModel):
+
+class Node(BaseModel):
     id: int
     name: str
     x: float
@@ -13,7 +14,7 @@ class Edge(BaseModel):
     id: int
     from_node: int
     to_node: int
-    wight: float
+    weight: float
 
 class Job(BaseModel):
     id: int
@@ -30,39 +31,40 @@ class Dataset(BaseModel):
     jobs: list[Job]
     precedences: list[Precedence]
 
+
 @router.post("/upload_dataset")
 def upload_dataset(data: Dataset):
     conn = db.get_connection()
     cur = conn.cursor()
 
-    # Limpar dados antigos
-    cur.execute("DELETE FROM nodes")
-    cur.execute("DELETE FROM edges")
-    cur.execute("DELETE FROM jobs")
+    # limpar tabelas
     cur.execute("DELETE FROM precedences")
+    cur.execute("DELETE FROM jobs")
+    cur.execute("DELETE FROM edges")
+    cur.execute("DELETE FROM nodes")
 
-    # Inserir nodes
+    # inserir nodes
     for n in data.nodes:
         cur.execute(
             "INSERT INTO nodes (id, name, x, y) VALUES (?, ?, ?, ?)",
             (n.id, n.name, n.x, n.y)
         )
 
-    # Inserir edges
+    # inserir edges
     for e in data.edges:
         cur.execute(
             "INSERT INTO edges (id, from_node, to_node, weight) VALUES (?, ?, ?, ?)",
             (e.id, e.from_node, e.to_node, e.weight)
         )
 
-    # Inserir jobs
+    # inserir jobs
     for j in data.jobs:
         cur.execute(
             "INSERT INTO jobs (id, type, node_id) VALUES (?, ?, ?)",
             (j.id, j.type, j.node_id)
         )
 
-    # Inserir precedências
+    # inserir precedences
     for p in data.precedences:
         cur.execute(
             "INSERT INTO precedences (job_before, job_after) VALUES (?, ?)",
@@ -71,4 +73,5 @@ def upload_dataset(data: Dataset):
 
     conn.commit()
     conn.close()
+
     return {"message": "Dataset inserido com sucesso!"}

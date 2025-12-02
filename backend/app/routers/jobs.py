@@ -1,6 +1,5 @@
 from fastapi import APIRouter, HTTPException
 import app.database.connection as db
-from collections import deque
 
 router = APIRouter()
 
@@ -36,42 +35,48 @@ def load_jobs_and_precedences():
 
 def topological_sort(jobs: list[int], precedences: list[tuple[int, int]]):
     """
-    Ordenação topológica usando algoritmo de Kahn.
+    Ordenação topológica usando DFS.
     jobs: lista de ids de jobs (vértices)
     precedences: lista de pares (a, b) significando a -> b
     Retorna (has_cycle, order)
     """
-    # inicializa grafo e grau de entrada
+    # monta lista de adjacência
     adj: dict[int, list[int]] = {j: [] for j in jobs}
-    indegree: dict[int, int] = {j: 0 for j in jobs}
-
-    # constroi grafo de precedências
     for before, after in precedences:
-        # se por algum motivo existir precedência para job que não está na tabela jobs,
-        # ignoramos silenciosamente (FK deveria evitar isso, mas por segurança).
         if before not in adj or after not in adj:
             continue
         adj[before].append(after)
-        indegree[after] += 1
 
-    # fila com todos os vértices de grau de entrada 0
-    q = deque([j for j in jobs if indegree[j] == 0])
-
+    # 0 = não visitado, 1 = em processamento, 2 = finalizado
+    visited: dict[int, int] = {j: 0 for j in jobs}
     order: list[int] = []
+    has_cycle = False
 
-    while q:
-        u = q.popleft()
+    def dfs(u: int):
+        nonlocal has_cycle
+        if has_cycle:
+            return
+
+        visited[u] = 1  # cinza: em processamento
+        for v in adj[u]:
+            if visited[v] == 0:         # branco
+                dfs(v)
+            elif visited[v] == 1:       # cinza -> cinza: ciclo
+                has_cycle = True
+                return
+
+        visited[u] = 2  # preto: finalizado
         order.append(u)
 
-        for v in adj[u]:
-            indegree[v] -= 1
-            if indegree[v] == 0:
-                q.append(v)
+    # roda DFS em todos os componentes
+    for j in jobs:
+        if visited[j] == 0:
+            dfs(j)
 
-    # se não conseguimos ordenar todos, há ciclo
-    if len(order) != len(jobs):
-        return True, []  # has_cycle = True, sem ordem válida
+    if has_cycle:
+        return True, []  # ciclo detectado
 
+    order.reverse()      # DFS põe na ordem reversa de finalização
     return False, order
 
 

@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
 import {
-  Upload,
   Play,
   AlertTriangle,
   CheckCircle,
@@ -101,9 +100,10 @@ const APP_STYLES = `
   
   .grid-layout { display: grid; gap: 24px; }
   
-  /* Responsive Grid */
+  /* Responsive Grid - MODIFICADO: Removida a configuração de colunas para Matriz, deixando Mapa full */
   @media (min-width: 1024px) {
-    .grid-layout-main { grid-template-columns: 2fr 1fr; }
+    /* .grid-layout-main { grid-template-columns: 2fr 1fr; }  <-- REMOVIDO PARA OCUPAR TELA CHEIA */
+    .grid-layout-main { grid-template-columns: 1fr; }
     .grid-layout-compare { grid-template-columns: 1fr 1fr; }
     .col-span-2 { grid-column: span 2; }
   }
@@ -218,20 +218,7 @@ const MOCK_DATASET = {
 const API_BASE = "http://localhost:8000";
 
 const api = {
-  async uploadDataset(data) {
-    try {
-      const res = await fetch(`${API_BASE}/dataset/upload_dataset`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data),
-      });
-      if (!res.ok) throw new Error("Falha no upload");
-      return await res.json();
-    } catch (e) {
-      console.warn("API Error (Upload), using mock:", e);
-      return { message: "Dataset carregado (MOCK)" };
-    }
-  },
+  // REMOVIDA A FUNÇÃO DE UPLOAD PARA O BACKEND
   async getTopo() {
     try {
       const res = await fetch(`${API_BASE}/jobs/topo`);
@@ -596,8 +583,8 @@ const WorkDayPage = ({
       </div>
 
       <div className="grid-layout grid-layout-main">
-        {/* Mapa */}
-        <div className="card" style={{ margin: 0 }}>
+        {/* Mapa - Agora ocupando mais espaço se a matriz sumir */}
+        <div className="card" style={{ margin: 0, gridColumn: "1 / -1" }}>
           <h3 className="card-title">
             <MapIcon size={20} /> Visualização da Rota
           </h3>
@@ -671,95 +658,43 @@ const WorkDayPage = ({
           )}
         </div>
 
-        {/* Matriz */}
-        <div
-          className="card"
-          style={{
-            margin: 0,
-            display: "flex",
-            flexDirection: "column",
-            height: "100%",
-          }}
-        >
-          <h3 className="card-title">
-            <Layout size={20} /> Matriz de Custos (C)
-          </h3>
-          <p className="text-xs text-slate-500 mb-4">
-            Clique nas células para ver o caminho.
-          </p>
-          <div style={{ flex: 1, overflow: "auto" }}>
+        {/* Matriz de Custos - COMENTADA/REMOVIDA DA VISUALIZAÇÃO
+        <div className="card" style={{margin:0, display:'flex', flexDirection:'column', height:'100%'}}>
+          <h3 className="card-title"><Layout size={20}/> Matriz de Custos (C)</h3>
+          <p className="text-xs text-slate-500 mb-4">Clique nas células para ver o caminho.</p>
+          <div style={{flex:1, overflow:'auto'}}>
             {matrix ? (
-              <table style={{ width: "100%", borderCollapse: "collapse" }}>
+              <table style={{width:'100%', borderCollapse:'collapse'}}>
                 <thead>
                   <tr>
                     <th className="matrix-cell matrix-cell-header"></th>
-                    {matrix.nodes.map((n) => (
-                      <th key={n} className="matrix-cell matrix-cell-header">
-                        {n}
-                      </th>
-                    ))}
+                    {matrix.nodes.map(n => <th key={n} className="matrix-cell matrix-cell-header">{n}</th>)}
                   </tr>
                 </thead>
                 <tbody>
                   {matrix.matrix.map((row, i) => (
                     <tr key={i}>
-                      <td className="matrix-cell matrix-cell-header">
-                        {matrix.nodes[i]}
-                      </td>
+                      <td className="matrix-cell matrix-cell-header">{matrix.nodes[i]}</td>
                       {row.map((cell, j) => (
-                        <td
-                          key={j}
-                          onClick={() =>
-                            setActiveCell({
-                              from: matrix.nodes[i],
-                              to: matrix.nodes[j],
-                              val: cell,
-                            })
-                          }
-                          className={`matrix-cell ${
-                            cell === 0 ? "matrix-cell-empty" : ""
-                          }`}
-                        >
-                          {cell === null ? "∞" : cell}
+                        <td key={j} 
+                            onClick={() => setActiveCell({from: matrix.nodes[i], to: matrix.nodes[j], val: cell})} 
+                            className={`matrix-cell ${cell === 0 ? 'matrix-cell-empty' : ''}`}>
+                          {cell === null ? '∞' : cell}
                         </td>
                       ))}
                     </tr>
                   ))}
                 </tbody>
               </table>
-            ) : (
-              <div
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  height: "100px",
-                  color: "#cbd5e1",
-                }}
-              >
-                Carregando...
-              </div>
-            )}
+            ) : <div style={{display:'flex', alignItems:'center', justifyContent:'center', height:'100px', color:'#cbd5e1'}}>Carregando...</div>}
           </div>
           {activeCell && (
-            <div
-              style={{
-                marginTop: "16px",
-                padding: "12px",
-                backgroundColor: "#eff6ff",
-                border: "1px solid #dbeafe",
-                borderRadius: "4px",
-                color: "#1e40af",
-                fontSize: "0.9rem",
-              }}
-            >
-              <strong>
-                Caminho {activeCell.from} → {activeCell.to}:
-              </strong>{" "}
-              Custo {activeCell.val}
+            <div style={{marginTop:'16px', padding:'12px', backgroundColor:'#eff6ff', border:'1px solid #dbeafe', borderRadius:'4px', color:'#1e40af', fontSize:'0.9rem'}}>
+              <strong>Caminho {activeCell.from} → {activeCell.to}:</strong> Custo {activeCell.val}
             </div>
           )}
         </div>
+        */}
       </div>
     </div>
   );
@@ -909,13 +844,13 @@ const ComparisonPage = ({
                 Análise do Gap
               </h4>
               <p className="text-sm" style={{ color: "#1E3A5F" }}>
+                {/* MODIFICADO: Exibindo diferença em tempo ao invés de porcentagem */}
                 O algoritmo Guloso foi{" "}
-                {(
-                  ((greedyRes.total_cost - optimalRes.total_cost) /
-                    optimalRes.total_cost) *
-                  100
-                ).toFixed(1)}
-                % mais lento que o Ótimo.
+                <strong>
+                  {(greedyRes.total_cost - optimalRes.total_cost).toFixed(1)}{" "}
+                  unidades de tempo
+                </strong>{" "}
+                mais lento que o Ótimo.
               </p>
             </div>
           </div>
@@ -966,12 +901,9 @@ const App = () => {
   }, []);
 
   const handleLoadDefault = async () => {
-    try {
-      await api.uploadDataset(MOCK_DATASET);
-      setDataset(MOCK_DATASET);
-    } catch (e) {
-      setDataset(MOCK_DATASET);
-    }
+    // MODIFICADO: Removido o upload para o backend.
+    // Assumimos que o dataset vem do backend ou usamos o mock apenas para inicializar o estado visual.
+    setDataset(MOCK_DATASET);
   };
 
   const loadMatrix = async () => {
@@ -1039,29 +971,6 @@ const App = () => {
               <BarChart2 size={20} /> Comparação
             </button>
           </nav>
-          <div className="sidebar-status">
-            <p
-              className="text-xs"
-              style={{ marginBottom: "8px", color: "#A0C4E8" }}
-            >
-              Status do Sistema
-            </p>
-            <div
-              className="flex-row items-center text-xs font-mono"
-              style={{ color: "#86efac" }}
-            >
-              <div
-                style={{
-                  width: "8px",
-                  height: "8px",
-                  backgroundColor: "#4ade80",
-                  borderRadius: "50%",
-                  marginRight: "8px",
-                }}
-              ></div>
-              Online
-            </div>
-          </div>
         </aside>
 
         {/* MAIN CONTENT */}
@@ -1072,11 +981,8 @@ const App = () => {
               {activeTab === "workday" && "Painel Operacional"}
               {activeTab === "compare" && "Análise de Algoritmos"}
             </h2>
+            {/* REMOVIDO BOTÃO DE UPLOAD */}
             <div className="header-actions">
-              <a className="text-link">
-                <Upload size={16} style={{ marginRight: "4px" }} /> Upload
-                Dataset
-              </a>
               <div className="avatar">U</div>
             </div>
           </header>

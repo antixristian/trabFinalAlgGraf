@@ -177,7 +177,7 @@ const generateLayout = (nodesList) => {
 const api = {
   async getGraph() {
     try {
-      const res = await fetch(`${API_BASE}/graph/adjacency`);
+      const res = await fetch(`${API_BASE}/routes/adjacency`);
       if (!res.ok) throw new Error("Erro ao buscar grafo");
       const data = await res.json();
 

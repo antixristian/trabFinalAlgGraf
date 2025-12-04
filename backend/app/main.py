@@ -4,7 +4,7 @@ from app.routers import dataset, graph, jobs, routes
 
 app = FastAPI()
 
-# Libera o frontend (Vite em 5173) acessar a API
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["http://localhost:5173"],

@@ -29,7 +29,6 @@ body {
   overflow: hidden;
 }
 
-/* Layout geral */
 .main-content {
   flex: 1;
   display: flex;
@@ -44,7 +43,6 @@ body {
   padding: 32px;
 }
 
-/* Sidebar */
 .sidebar {
   width: 260px;
   background-color: #1e3a5f;
@@ -91,7 +89,6 @@ body {
   border-radius: 8px;
 }
 
-/* Header */
 .header {
   height: 70px;
   background: white;
@@ -195,7 +192,6 @@ body {
   opacity: 0.9;
 }
 
-/* Cards */
 .card {
   background: white;
   padding: 24px;
@@ -223,7 +219,6 @@ body {
   border-top: 4px solid #2a9d8f;
 }
 
-/* Grid */
 .grid-layout {
   display: grid;
   gap: 24px;
@@ -272,7 +267,6 @@ body {
   background-color: #f8fafc;
 }
 
-/* Badges */
 .badge {
   padding: 4px 8px;
   border-radius: 4px;
@@ -291,7 +285,6 @@ body {
   color: #1d4ed8;
 }
 
-/* Pesos no mapa */
 .map-weight-badge {
   font-size: 10px;
   font-weight: bold;
@@ -307,7 +300,6 @@ body {
   rx: 4;
 }
 
-/* Utilitários */
 .flex-row {
   display: flex;
   flex-direction: row;
@@ -353,7 +345,7 @@ body {
   font-family: monospace;
 }
 
-/* Status */
+
 .status-badge {
   padding: 4px 12px;
   border-radius: 999px;
@@ -381,7 +373,6 @@ body {
   margin: 0 12px;
 }
 
-/* Loading */
 @keyframes spin {
   from {
     transform: rotate(0deg);
@@ -406,7 +397,6 @@ body {
   z-index: 50;
 }
 
-/* Avatar */
 .avatar {
   width: 32px;
   height: 32px;
@@ -420,7 +410,6 @@ body {
   font-size: 0.8rem;
 }
 
-/* Inputs */
 .input-control {
   padding: 8px 12px;
   border: 1px solid #cbd5e1;

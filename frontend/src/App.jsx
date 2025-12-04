@@ -14,11 +14,6 @@ import {
   Truck,
 } from "lucide-react";
 
-/**
- * =============================================================================
- * 🎨 CSS STYLES (inline, estilo dashboard)
- * =============================================================================
- */
 const APP_STYLES = `
   * { box-sizing: border-box; margin: 0; padding: 0; }
   
@@ -148,10 +143,6 @@ const COLORS = {
 
 const API_BASE = "http://localhost:8000";
 
-/**
- * Gera layout circular de nós (se backend não mandar coordenadas).
- * Aqui usamos só os IDs dos nós.
- */
 const generateLayout = (nodesList) => {
   const count = nodesList.length;
   const radius = 250;
@@ -169,11 +160,7 @@ const generateLayout = (nodesList) => {
   });
 };
 
-/**
- * =============================================================================
- * 📂 Serviços de API
- * =============================================================================
- */
+
 const api = {
   async getGraph() {
     try {
@@ -258,11 +245,7 @@ const api = {
   },
 };
 
-/**
- * =============================================================================
- * Canvas do Mapa (SVG)
- * =============================================================================
- */
+
 const MapCanvas = ({
   nodes,
   edges,
@@ -427,11 +410,6 @@ const MapCanvas = ({
   );
 };
 
-/**
- * =============================================================================
- * Páginas
- * =============================================================================
- */
 
 // Tabela de jobs
 const JobsPage = ({ jobs, nodes }) => {
@@ -820,11 +798,6 @@ const ComparisonPage = ({
   );
 };
 
-/**
- * =============================================================================
- * 🎯 MAIN APP
- * =============================================================================
- */
 const App = () => {
   const [activeTab, setActiveTab] = useState("jobs");
   const [dataset, setDataset] = useState({ nodes: [], edges: [], jobs: [] });

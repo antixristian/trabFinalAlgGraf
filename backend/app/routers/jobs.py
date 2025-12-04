@@ -7,8 +7,7 @@ router = APIRouter()
 def load_jobs_and_precedences():
     """
     Carrega do banco:
-    - todos os ids de jobs
-    - todas as precedências (job_before -> job_after)
+
     """
     conn = db.get_connection()
     cur = conn.cursor()
@@ -34,12 +33,6 @@ def load_jobs_and_precedences():
 
 
 def topological_sort(jobs: list[int], precedences: list[tuple[int, int]]):
-    """
-    Ordenação topológica usando DFS.
-    jobs: lista de ids de jobs (vértices)
-    precedences: lista de pares (a, b) significando a -> b
-    Retorna (has_cycle, order)
-    """
     # monta lista de adjacência
     adj: dict[int, list[int]] = {j: [] for j in jobs}
     for before, after in precedences:
@@ -47,7 +40,6 @@ def topological_sort(jobs: list[int], precedences: list[tuple[int, int]]):
             continue
         adj[before].append(after)
 
-    # 0 = não visitado, 1 = em processamento, 2 = finalizado
     visited: dict[int, int] = {j: 0 for j in jobs}
     order: list[int] = []
     has_cycle = False
@@ -57,15 +49,15 @@ def topological_sort(jobs: list[int], precedences: list[tuple[int, int]]):
         if has_cycle:
             return
 
-        visited[u] = 1  # cinza: em processamento
+        visited[u] = 1 
         for v in adj[u]:
-            if visited[v] == 0:         # branco
+            if visited[v] == 0:         
                 dfs(v)
-            elif visited[v] == 1:       # cinza -> cinza: ciclo
+            elif visited[v] == 1:       
                 has_cycle = True
                 return
 
-        visited[u] = 2  # preto: finalizado
+        visited[u] = 2  
         order.append(u)
 
     # roda DFS em todos os componentes
@@ -74,9 +66,9 @@ def topological_sort(jobs: list[int], precedences: list[tuple[int, int]]):
             dfs(j)
 
     if has_cycle:
-        return True, []  # ciclo detectado
+        return True, []  
 
-    order.reverse()      # DFS põe na ordem reversa de finalização
+    order.reverse()      
     return False, order
 
 

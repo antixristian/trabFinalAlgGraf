@@ -38,11 +38,6 @@ def load_graph_from_db():
 
 
 def dijkstra(adj: dict[int, list[tuple[int, float]]], start: int):
-    """
-    Dijkstra clássico com heapq.
-    adj: {node: [(vizinho, peso), ...]}
-    retorna (dist, prev)
-    """
     INF = float("inf")
     dist = {v: INF for v in adj.keys()}
     prev = {v: None for v in adj.keys()}
@@ -85,7 +80,6 @@ def reconstruct_path(prev: dict[int, int | None], start: int, end: int) -> list[
         cur = prev[cur]
 
     if path[-1] != start:
-        # não chegou no start → não existe caminho
         return []
 
     path.reverse()

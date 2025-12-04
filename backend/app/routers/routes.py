@@ -7,13 +7,8 @@ from app.routers import jobs as jobs_router
 router = APIRouter()
 
 
-# ---------- Parte 1: carregar grafo e jobs do banco ----------
-
 def load_graph_from_db():
-    """
-    Retorna (nodes, adj)
-    adj: node_id -> [(vizinho, peso), ...]
-    """
+
     conn = db.get_connection()
     cur = conn.cursor()
 
@@ -61,16 +56,13 @@ def load_jobs_and_precedences():
     return jobs, job_nodes, prec_rows
 
 
-# ---------- Parte 2: Dijkstra e Recuperação de Caminho (MODIFICADO) ----------
+
 
 def dijkstra_with_path(adj: dict[int, list[tuple[int, float]]], start: int):
-    """
-    Retorna (dist, parents).
-    parents[v] = nó anterior a v no caminho mínimo vindo de start.
-    """
+
     INF = float("inf")
     dist = {v: INF for v in adj.keys()}
-    parents = {v: None for v in adj.keys()}  # Para reconstrução do caminho
+    parents = {v: None for v in adj.keys()}  
 
     if start not in adj:
         raise HTTPException(status_code=404, detail=f"Nó {start} não existe no grafo.")
@@ -93,12 +85,7 @@ def dijkstra_with_path(adj: dict[int, list[tuple[int, float]]], start: int):
 
 
 def compute_costs_and_paths(adj: dict[int, list[tuple[int, float]]], relevant_nodes: set[int]):
-    """
-    Pré-calcula custos E pais para reconstrução.
-    Retorna (costs, all_parents).
-    costs[u][v] = custo float
-    all_parents[u][v] = predecessor de v partindo de u
-    """
+ 
     costs: dict[int, dict[int, float]] = {}
     all_parents: dict[int, dict[int, int | None]] = {}
 
@@ -111,10 +98,7 @@ def compute_costs_and_paths(adj: dict[int, list[tuple[int, float]]], relevant_no
 
 
 def get_path_edges(parents: dict[int, int | None], start: int, end: int) -> list[tuple[int, int]]:
-    """
-    Reconstrói a lista de arestas [(n1, n2), (n2, n3), ...] do start até o end
-    usando o dicionário de parents.
-    """
+
     if start == end:
         return []
     
@@ -132,8 +116,6 @@ def get_path_edges(parents: dict[int, int | None], start: int, end: int) -> list
     return path[::-1]
 
 
-# ---------- Parte 3: modelagem das precedências ----------
-
 def build_prereqs(jobs: list[int], precedences: list[tuple[int, int]]):
     prereqs: dict[int, set[int]] = {j: set() for j in jobs}
     succs: dict[int, set[int]] = {j: set() for j in jobs}
@@ -147,32 +129,30 @@ def build_prereqs(jobs: list[int], precedences: list[tuple[int, int]]):
     return prereqs, succs
 
 
-# ---------- Parte 4: algoritmo GULOSO (MODIFICADO) ----------
-
 def greedy_route(start_node: int):
-    # 1. carregar
+    
     nodes, adj = load_graph_from_db()
     jobs, job_nodes, prec_rows = load_jobs_and_precedences()
 
     if start_node not in nodes:
         raise HTTPException(status_code=404, detail=f"start_node {start_node} não existe.")
 
-    # 2. ciclo
+    
     has_cycle, _ = jobs_router.topological_sort(jobs, prec_rows) # type: ignore
     if has_cycle:
         raise HTTPException(status_code=400, detail="Ciclo detectado nas precedências.")
 
-    # 3. prereqs
+    
     prereqs, _ = build_prereqs(jobs, prec_rows)
 
-    # 4. pré-calcular custos e paths
+    
     relevant_nodes: set[int] = set(job_nodes.values())
     relevant_nodes.add(start_node)
 
-    # MODIFICADO: Pegamos também os parents
+    
     costs, all_parents = compute_costs_and_paths(adj, relevant_nodes)
 
-    # 5. loop guloso
+    
     completed: set[int] = set()
     remaining: set[int] = set(jobs)
     current_node = start_node
@@ -229,11 +209,9 @@ def get_greedy_route(start_node: int = 1):
         "start_node": start,
         "job_order": job_order,
         "total_cost": total_cost,
-        "path_edges": path_edges  # Nova chave no JSON
+        "path_edges": path_edges  
     }
 
-
-# ---------- Parte 5: algoritmo ÓTIMO (MODIFICADO) ----------
 
 def optimal_route(start_node: int):
     nodes, adj = load_graph_from_db()
@@ -254,10 +232,10 @@ def optimal_route(start_node: int):
     relevant_nodes: set[int] = set(job_nodes.values())
     relevant_nodes.add(start_node)
     
-    # MODIFICADO: Agora calculamos parents também para usar no final
+    
     costs_nodes, all_parents = compute_costs_and_paths(adj, relevant_nodes)
 
-    # --- Setup DP (igual ao anterior) ---
+   
     start_to_job = [float("inf")] * n
     for job_id, idx in job_index.items():
         node_j = job_nodes[job_id]
@@ -280,7 +258,7 @@ def optimal_route(start_node: int):
     dp = [[INF] * n for _ in range(size)]
     parent_state: dict[tuple[int, int], tuple[int, int] | None] = {}
 
-    # Inicialização DP
+   
     for job_id, idx in job_index.items():
         if prereqs[job_id]:
             continue
@@ -291,7 +269,7 @@ def optimal_route(start_node: int):
         dp[mask][idx] = cost
         parent_state[(mask, idx)] = None 
 
-    # Transições DP
+    
     for mask in range(size):
         for last in range(n):
             cur_cost = dp[mask][last]
@@ -306,7 +284,7 @@ def optimal_route(start_node: int):
 
                 next_job_id = jobs[k]
                 
-                # Check precedences
+                
                 jobs_done_in_mask = {jobs[i] for i in range(n) if mask & (1 << i)}
                 if not prereqs[next_job_id].issubset(jobs_done_in_mask):
                     continue
@@ -321,7 +299,7 @@ def optimal_route(start_node: int):
                     dp[next_mask][k] = new_cost
                     parent_state[(next_mask, k)] = (mask, last)
 
-    # Recuperar solução
+    
     full_mask = (1 << n) - 1
     best_cost = INF
     best_last = -1
@@ -344,17 +322,17 @@ def optimal_route(start_node: int):
     job_order_indices.reverse()
     job_order = [jobs[i] for i in job_order_indices]
 
-    # --- MODIFICADO: Reconstruir caminho físico ---
+   
     full_path_edges = []
     current_node = start_node
     
     for job_id in job_order:
         target_node = job_nodes[job_id]
         
-        # Pega o mapa de pais partindo de current_node
+        
         parents_from_curr = all_parents[current_node]
         
-        # Gera arestas
+        
         segment_edges = get_path_edges(parents_from_curr, current_node, target_node)
         full_path_edges.extend(segment_edges)
         
@@ -372,36 +350,11 @@ def get_optimal_route(start_node: int = 1):
         "start_node": start,
         "job_order": job_order,
         "total_cost": total_cost,
-        "path_edges": path_edges # Nova chave no JSON
+        "path_edges": path_edges 
     }
 @router.get("/adjacency")
 def get_adjacency_list():
-    """
-    Retorna o grafo viário como lista de adjacência,
-    pronto pra consumir no frontend.
-
-    Formato de resposta:
-    {
-      "nodes": [1, 2, 3, ...],
-      "adjacency": [
-        {
-          "node": 1,
-          "neighbors": [
-            {"to": 2, "weight": 2.3},
-            {"to": 8, "weight": 3.0}
-          ]
-        },
-        {
-          "node": 2,
-          "neighbors": [
-            {"to": 3, "weight": 2.0},
-            {"to": 9, "weight": 2.2}
-          ]
-        },
-        ...
-      ]
-    }
-    """
+    
     # reaproveita a função que você já tem
     nodes, adj = load_graph_from_db()
 

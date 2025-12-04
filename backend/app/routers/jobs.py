@@ -100,3 +100,17 @@ def get_topological_order():
         "has_cycle": False,
         "order": order
     }
+
+@router.get("/")
+def list_jobs():
+    """
+    Retorna todos os jobs com id, type e node_id.
+    Usado pelo frontend para mostrar a tabela e montar as rotas no mapa.
+    """
+    conn = db.get_connection()
+    cur = conn.cursor()
+    cur.execute("SELECT id, type, node_id FROM jobs ORDER BY id")
+    rows = cur.fetchall()
+    conn.close()
+
+    return [{"id": r[0], "type": r[1], "node_id": r[2]} for r in rows]

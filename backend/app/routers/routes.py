@@ -374,3 +374,49 @@ def get_optimal_route(start_node: int = 1):
         "total_cost": total_cost,
         "path_edges": path_edges # Nova chave no JSON
     }
+@router.get("/adjacency")
+def get_adjacency_list():
+    """
+    Retorna o grafo viário como lista de adjacência,
+    pronto pra consumir no frontend.
+
+    Formato de resposta:
+    {
+      "nodes": [1, 2, 3, ...],
+      "adjacency": [
+        {
+          "node": 1,
+          "neighbors": [
+            {"to": 2, "weight": 2.3},
+            {"to": 8, "weight": 3.0}
+          ]
+        },
+        {
+          "node": 2,
+          "neighbors": [
+            {"to": 3, "weight": 2.0},
+            {"to": 9, "weight": 2.2}
+          ]
+        },
+        ...
+      ]
+    }
+    """
+    # reaproveita a função que você já tem
+    nodes, adj = load_graph_from_db()
+
+    adjacency = []
+    for node_id in nodes:
+        neighbors = [
+            {"to": neighbor_id, "weight": weight}
+            for (neighbor_id, weight) in adj[node_id]
+        ]
+        adjacency.append({
+            "node": node_id,
+            "neighbors": neighbors
+        })
+
+    return {
+        "nodes": nodes,
+        "adjacency": adjacency
+    }

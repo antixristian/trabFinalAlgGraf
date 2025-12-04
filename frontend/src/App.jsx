@@ -6,25 +6,22 @@ import {
   Map as MapIcon,
   BarChart2,
   List,
-  Layout,
   Activity,
   Zap,
   Layers,
   Home,
   GitGraph,
+  Truck,
 } from "lucide-react";
 
 /**
  * =============================================================================
- * 🎨 CSS STYLES (Vanilla CSS)
- * Layout idêntico ao original, sem dependências de Tailwind.
+ * 🎨 CSS STYLES (inline, estilo dashboard)
  * =============================================================================
  */
 const APP_STYLES = `
-  /* Reset & Base Globals */
   * { box-sizing: border-box; margin: 0; padding: 0; }
   
-  /* Garante que html, body e root ocupem todo o espaço disponível */
   html, body, #root {
     width: 100%;
     height: 100%;
@@ -33,7 +30,6 @@ const APP_STYLES = `
     overflow: hidden;
   }
 
-  /* Remove estilos padrões do Vite que podem centralizar ou limitar o #root */
   #root {
     max-width: none !important;
     margin: 0 !important;
@@ -45,7 +41,6 @@ const APP_STYLES = `
     background-color: #F2F6FA;
   }
   
-  /* Layout Containers */
   .app-container { 
     display: flex; 
     width: 100vw; 
@@ -58,7 +53,6 @@ const APP_STYLES = `
   .main-content { flex: 1; display: flex; flex-direction: column; overflow: hidden; position: relative; }
   .scroll-area { flex: 1; overflow-y: auto; padding: 32px; }
   
-  /* Sidebar */
   .sidebar { width: 260px; background-color: #1E3A5F; color: white; display: flex; flex-direction: column; box-shadow: 4px 0 24px rgba(0,0,0,0.1); z-index: 20; flex-shrink: 0; }
   .sidebar-header { padding: 24px; border-bottom: 1px solid rgba(255,255,255,0.1); }
   .sidebar-title { font-size: 1.5rem; font-weight: bold; display: flex; align-items: center; gap: 10px; }
@@ -66,12 +60,10 @@ const APP_STYLES = `
   .sidebar-nav { flex: 1; padding: 24px 12px; display: flex; flex-direction: column; gap: 8px; }
   .sidebar-status { margin: 12px; padding: 16px; background-color: rgba(0,0,0,0.2); border-radius: 8px; }
   
-  /* Header */
   .header { height: 70px; background: white; border-bottom: 1px solid #e2e8f0; display: flex; align-items: center; justify-content: space-between; padding: 0 32px; flex-shrink: 0; }
   .header-title { font-size: 1.25rem; font-weight: bold; color: #1E3A5F; }
   .header-actions { display: flex; align-items: center; gap: 16px; }
   
-  /* Components: Buttons */
   .btn { display: inline-flex; align-items: center; padding: 10px 20px; border-radius: 8px; font-weight: 600; font-size: 0.9rem; cursor: pointer; border: none; transition: all 0.2s ease; gap: 8px; }
   .btn:disabled { opacity: 0.5; cursor: not-allowed; }
   .btn:active { transform: scale(0.98); }
@@ -92,7 +84,6 @@ const APP_STYLES = `
   .btn-optimal { background-color: #2A9D8F; color: white; }
   .btn-optimal:hover { opacity: 0.9; }
   
-  /* Components: Cards & Layouts */
   .card { background: white; padding: 24px; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); border: 1px solid #e2e8f0; margin-bottom: 24px; }
   .card-title { font-size: 1.1rem; font-weight: bold; color: #1E3A5F; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
   .card-border-top-orange { border-top: 4px solid #F4A261; }
@@ -100,15 +91,12 @@ const APP_STYLES = `
   
   .grid-layout { display: grid; gap: 24px; }
   
-  /* Responsive Grid - MODIFICADO: Removida a configuração de colunas para Matriz, deixando Mapa full */
   @media (min-width: 1024px) {
-    /* .grid-layout-main { grid-template-columns: 2fr 1fr; }  <-- REMOVIDO PARA OCUPAR TELA CHEIA */
     .grid-layout-main { grid-template-columns: 1fr; }
     .grid-layout-compare { grid-template-columns: 1fr 1fr; }
     .col-span-2 { grid-column: span 2; }
   }
   
-  /* Table Styles */
   .table-container { overflow-x: auto; }
   .custom-table { width: 100%; border-collapse: collapse; text-align: left; }
   .custom-table th { padding: 12px 16px; color: #475569; font-size: 0.85rem; font-weight: 600; border-bottom: 1px solid #e2e8f0; background-color: #f8fafc; }
@@ -119,13 +107,9 @@ const APP_STYLES = `
   .badge-pickup { background-color: #fef3c7; color: #b45309; }
   .badge-dropoff { background-color: #dbeafe; color: #1d4ed8; }
   
-  /* Matrix Grid */
-  .matrix-cell { padding: 8px; border: 1px solid #f1f5f9; text-align: center; cursor: pointer; transition: background 0.2s; font-size: 0.85rem; }
-  .matrix-cell:hover { background-color: #eff6ff; }
-  .matrix-cell-header { background-color: #f1f5f9; font-weight: bold; color: #475569; }
-  .matrix-cell-empty { background-color: #f8fafc; color: #cbd5e1; }
-  
-  /* Utilities */
+  .map-weight-badge { font-size: 10px; font-weight: bold; fill: #475569; text-anchor: middle; alignment-baseline: middle; }
+  .map-weight-bg { fill: #F1F5F9; stroke: #CBD5E1; stroke-width: 1px; rx: 4; }
+
   .flex-row { display: flex; flex-direction: row; }
   .flex-wrap { flex-wrap: wrap; }
   .items-center { align-items: center; }
@@ -148,157 +132,135 @@ const APP_STYLES = `
   @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
   
   .loading-overlay { position: absolute; inset: 0; background: rgba(255,255,255,0.7); backdrop-filter: blur(2px); display: flex; align-items: center; justify-content: center; z-index: 50; }
-  
-  .text-link { color: #4F83C3; font-weight: 500; cursor: pointer; text-decoration: none; display: flex; align-items: center; font-size: 0.9rem; }
-  .text-link:hover { text-decoration: underline; }
   .avatar { width: 32px; height: 32px; background-color: #1E3A5F; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 0.8rem; }
+
+  .input-control { padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 6px; width: 100px; }
+  .label-control { font-size: 0.85rem; color: #475569; font-weight: 600; margin-right: 8px; }
 `;
 
-/**
- * =============================================================================
- * 📂 UTILS / CONSTANTS
- * =============================================================================
- */
 const COLORS = {
   primary: "#1E3A5F",
-  secondary: "#4F83C3",
-  bg: "#F2F6FA",
-  card: "#FFFFFF",
-
-  // Grafos
-  nodeNormal: "#4F83C3",
-  nodeAction: "#FFD166",
-  nodeViolation: "#EF476F",
-  edgeStandard: "#7EA1D9",
-  edgeRoute: "#118AB2",
-  edgePath: "#06D6A0",
-
-  // Estratégias
   greedy: "#F4A261",
   optimal: "#2A9D8F",
+  edgeStandard: "#7EA1D9",
+  edgeRoute: "#118AB2",
 };
 
-const MOCK_DATASET = {
-  nodes: [
-    { id: 1, name: "Portaria", x: 50, y: 50 },
-    { id: 2, name: "Bloco A", x: 200, y: 50 },
-    { id: 3, name: "Bloco B", x: 350, y: 150 },
-    { id: 4, name: "Refeitório", x: 200, y: 250 },
-    { id: 5, name: "Biblioteca", x: 50, y: 250 },
-    { id: 6, name: "Admin", x: 125, y: 150 },
-  ],
-  edges: [
-    { id: 1, from_node: 1, to_node: 2, weight: 10 },
-    { id: 2, from_node: 2, to_node: 3, weight: 15 },
-    { id: 3, from_node: 3, to_node: 4, weight: 12 },
-    { id: 4, from_node: 4, to_node: 5, weight: 10 },
-    { id: 5, from_node: 5, to_node: 1, weight: 8 },
-    { id: 6, from_node: 1, to_node: 6, weight: 5 },
-    { id: 7, from_node: 6, to_node: 2, weight: 5 },
-    { id: 8, from_node: 6, to_node: 4, weight: 7 },
-    { id: 9, from_node: 2, to_node: 4, weight: 20 },
-  ],
-  jobs: [
-    { id: 101, type: "Pickup", node_id: 2 },
-    { id: 102, type: "Dropoff", node_id: 5 },
-    { id: 103, type: "Pickup", node_id: 3 },
-    { id: 104, type: "Dropoff", node_id: 4 },
-  ],
-  precedences: [
-    { job_before: 101, job_after: 102 },
-    { job_before: 103, job_after: 104 },
-  ],
+const API_BASE = "http://localhost:8000";
+
+/**
+ * Gera layout circular de nós (se backend não mandar coordenadas).
+ * Aqui usamos só os IDs dos nós.
+ */
+const generateLayout = (nodesList) => {
+  const count = nodesList.length;
+  const radius = 250;
+  const centerX = 300;
+  const centerY = 300;
+
+  return nodesList.map((id, index) => {
+    const angle = (index / count) * 2 * Math.PI;
+    return {
+      id,
+      name: `Nó ${id}`,
+      x: centerX + radius * Math.cos(angle),
+      y: centerY + radius * Math.sin(angle),
+    };
+  });
 };
 
 /**
  * =============================================================================
- * 📂 SERVICES / API
+ * 📂 Serviços de API
  * =============================================================================
  */
-const API_BASE = "http://localhost:8000";
-
 const api = {
-  // REMOVIDA A FUNÇÃO DE UPLOAD PARA O BACKEND
+  async getGraph() {
+    try {
+      const res = await fetch(`${API_BASE}/graph/adjacency`);
+      if (!res.ok) throw new Error("Erro ao buscar grafo");
+      const data = await res.json();
+
+      const nodesWithCoords = generateLayout(data.nodes || []);
+      const edges = [];
+      (data.adjacency || []).forEach((item) => {
+        (item.neighbors || []).forEach((neighbor) => {
+          edges.push({
+            id: `${item.node}-${neighbor.to}`,
+            from_node: item.node,
+            to_node: neighbor.to,
+            weight: neighbor.weight,
+          });
+        });
+      });
+
+      return { nodes: nodesWithCoords, edges };
+    } catch (e) {
+      console.error(e);
+      return { nodes: [], edges: [] };
+    }
+  },
+
+  async getJobs() {
+    try {
+      const res = await fetch(`${API_BASE}/jobs`);
+      if (!res.ok) throw new Error("Erro ao buscar jobs");
+      const data = await res.json();
+      return data;
+    } catch (e) {
+      console.error(e);
+      return [];
+    }
+  },
+
   async getTopo() {
     try {
       const res = await fetch(`${API_BASE}/jobs/topo`);
-      if (!res.ok) throw new Error();
+      if (!res.ok) throw new Error("Erro ao buscar topológica");
       return await res.json();
     } catch (e) {
-      return { has_cycle: false, order: [101, 103, 102, 104] };
+      console.error(e);
+      return { has_cycle: false, order: [] };
     }
   },
+
   async getGreedy(startNode) {
     try {
-      const res = await fetch(
-        `${API_BASE}/routes/greedy?start_node=${startNode}`
-      );
-      if (!res.ok) throw new Error();
+      const res = await fetch(`${API_BASE}/routes/greedy?start_node=${startNode}`);
+      if (!res.ok) throw new Error("Erro ao calcular guloso");
       return await res.json();
     } catch (e) {
-      return {
-        strategy: "greedy",
-        start_node: startNode,
-        job_order: [101, 103, 102, 104],
-        total_cost: 45.0,
-        path_edges: [
-          [1, 6],
-          [6, 2],
-          [2, 3],
-          [3, 4],
-          [4, 5],
-        ],
-      };
+      console.error(e);
+      return null;
     }
   },
+
   async getOptimal(startNode) {
     try {
-      const res = await fetch(
-        `${API_BASE}/routes/optimal?start_node=${startNode}`
-      );
-      if (!res.ok) throw new Error();
+      const res = await fetch(`${API_BASE}/routes/optimal?start_node=${startNode}`);
+      if (!res.ok) throw new Error("Erro ao calcular ótimo");
       return await res.json();
     } catch (e) {
-      return {
-        strategy: "optimal",
-        start_node: startNode,
-        job_order: [103, 101, 104, 102],
-        total_cost: 38.0,
-        path_edges: [
-          [1, 6],
-          [6, 2],
-          [2, 3],
-          [3, 2],
-          [2, 4],
-          [4, 5],
-        ],
-      };
+      console.error(e);
+      return null;
     }
   },
-  async getMatrix() {
+
+  async getPath(from, to) {
     try {
-      const res = await fetch(`${API_BASE}/graph/cost_matrix`);
-      if (!res.ok) throw new Error();
+      const res = await fetch(`${API_BASE}/graph/path/${from}/${to}`);
+      if (!res.ok) throw new Error("Erro ao buscar caminho");
       return await res.json();
     } catch (e) {
-      return {
-        nodes: [1, 2, 3, 4, 5, 6],
-        matrix: [
-          [0, 10, 25, 12, 18, 5],
-          [10, 0, 15, 20, 28, 5],
-          [25, 15, 0, 12, 22, 18],
-          [12, 20, 12, 0, 10, 7],
-          [18, 28, 22, 10, 0, 15],
-          [5, 5, 18, 7, 15, 0],
-        ],
-      };
+      console.error(e);
+      return null;
     }
   },
 };
 
 /**
  * =============================================================================
- * 📂 COMPONENTS / SHARED
+ * Canvas do Mapa (SVG)
  * =============================================================================
  */
 const MapCanvas = ({
@@ -307,7 +269,7 @@ const MapCanvas = ({
   pathEdges = [],
   activeJobs = [],
   width = "100%",
-  height = 350,
+  height = 500,
   strategyColor = COLORS.edgeRoute,
 }) => {
   if (!nodes || nodes.length === 0)
@@ -319,13 +281,16 @@ const MapCanvas = ({
           justifyContent: "center",
           height,
           color: "#94a3b8",
+          background: "white",
+          borderRadius: "8px",
+          border: "1px solid #e2e8f0",
         }}
       >
-        Sem dados de mapa
+        Carregando mapa...
       </div>
     );
 
-  const padding = 40;
+  const padding = 60;
   const xs = nodes.map((n) => n.x);
   const ys = nodes.map((n) => n.y);
   const minX = Math.min(...xs);
@@ -351,47 +316,50 @@ const MapCanvas = ({
       }}
     >
       <defs>
-        <marker
-          id="arrow"
-          markerWidth="6"
-          markerHeight="6"
-          refX="15"
-          refY="3"
-          orient="auto"
-        >
+        <marker id="arrow" markerWidth="6" markerHeight="6" refX="16" refY="3" orient="auto">
           <path d="M0,0 L0,6 L9,3 z" fill={COLORS.edgeStandard} />
         </marker>
-        <marker
-          id="arrow-active"
-          markerWidth="6"
-          markerHeight="6"
-          refX="15"
-          refY="3"
-          orient="auto"
-        >
+        <marker id="arrow-active" markerWidth="6" markerHeight="6" refX="16" refY="3" orient="auto">
           <path d="M0,0 L0,6 L9,3 z" fill={strategyColor} />
         </marker>
       </defs>
 
+      {/* Todas as arestas */}
       {edges.map((e) => {
         const n1 = nodes.find((n) => n.id === e.from_node);
         const n2 = nodes.find((n) => n.id === e.to_node);
         if (!n1 || !n2) return null;
+
+        const midX = (n1.x + n2.x) / 2;
+        const midY = (n1.y + n2.y) / 2;
+
         return (
-          <line
-            key={`edge-${e.id}`}
-            x1={n1.x}
-            y1={n1.y}
-            x2={n2.x}
-            y2={n2.y}
-            stroke={COLORS.edgeStandard}
-            strokeWidth="2"
-            strokeOpacity="0.4"
-            markerEnd="url(#arrow)"
-          />
+          <g key={`edge-${e.id}`}>
+            <line
+              x1={n1.x}
+              y1={n1.y}
+              x2={n2.x}
+              y2={n2.y}
+              stroke={COLORS.edgeStandard}
+              strokeWidth="1.5"
+              strokeOpacity="0.3"
+              markerEnd="url(#arrow)"
+            />
+            <rect
+              x={midX - 10}
+              y={midY - 8}
+              width="20"
+              height="16"
+              className="map-weight-bg"
+            />
+            <text x={midX} y={midY} className="map-weight-badge">
+              {e.weight}
+            </text>
+          </g>
         );
       })}
 
+      {/* Arestas da rota destacadas */}
       {pathEdges.map((pair, idx) => {
         const n1 = nodes.find((n) => n.id === pair[0]);
         const n2 = nodes.find((n) => n.id === pair[1]);
@@ -404,13 +372,14 @@ const MapCanvas = ({
             x2={n2.x}
             y2={n2.y}
             stroke={strategyColor}
-            strokeWidth="4"
+            strokeWidth="3"
             strokeLinecap="round"
             markerEnd="url(#arrow-active)"
           />
         );
       })}
 
+      {/* Nós */}
       {nodes.map((n) => {
         const job = getJobAtNode(n.id);
         return (
@@ -418,38 +387,37 @@ const MapCanvas = ({
             <circle
               cx={n.x}
               cy={n.y}
-              r={job ? 12 : 8}
-              fill={job ? COLORS.nodeAction : COLORS.nodeNormal}
+              r={14}
+              fill={job ? "#FFD166" : "#4F83C3"}
               stroke="white"
               strokeWidth="2"
-              style={{ filter: "drop-shadow(0 2px 2px rgba(0,0,0,0.2))" }}
+              style={{
+                filter: "drop-shadow(0 2px 2px rgba(0,0,0,0.2))",
+                transition: "all 0.3s",
+              }}
             />
             <text
               x={n.x}
-              y={n.y - (job ? 18 : 14)}
+              y={n.y}
+              dy=".3em"
               textAnchor="middle"
               style={{
                 fontSize: "10px",
                 fontWeight: "bold",
-                fill: "#334155",
+                fill: job ? "#1e293b" : "white",
                 pointerEvents: "none",
               }}
             >
-              {n.name}
+              {n.id}
             </text>
             {job && (
               <text
                 x={n.x}
-                y={n.y + 4}
+                y={n.y - 20}
                 textAnchor="middle"
-                style={{
-                  fontSize: "10px",
-                  fontWeight: "bold",
-                  fill: "#1e293b",
-                  pointerEvents: "none",
-                }}
+                style={{ fontSize: "9px", fontWeight: "bold", fill: "#475569" }}
               >
-                {job.type[0]}
+                JOB
               </text>
             )}
           </g>
@@ -461,11 +429,11 @@ const MapCanvas = ({
 
 /**
  * =============================================================================
- * 📂 PAGES
+ * Páginas
  * =============================================================================
  */
 
-// --- JOBS PAGE ---
+// Tabela de jobs
 const JobsPage = ({ jobs, nodes }) => {
   return (
     <div className="card">
@@ -476,10 +444,9 @@ const JobsPage = ({ jobs, nodes }) => {
         <table className="custom-table">
           <thead>
             <tr>
-              <th>ID</th>
+              <th>ID Job</th>
               <th>Tipo</th>
-              <th>Local</th>
-              <th>Coords</th>
+              <th>Local (Nó)</th>
             </tr>
           </thead>
           <tbody>
@@ -491,30 +458,27 @@ const JobsPage = ({ jobs, nodes }) => {
                   <td>
                     <span
                       className={`badge ${
-                        job.type === "Pickup" ? "badge-pickup" : "badge-dropoff"
+                        job.type === "pickup" ? "badge-pickup" : "badge-dropoff"
                       }`}
                     >
                       {job.type}
                     </span>
                   </td>
-                  <td>{node ? node.name : `Nó ${job.node_id}`}</td>
-                  <td className="text-slate-500 text-xs">
-                    ({node?.x}, {node?.y})
-                  </td>
+                  <td>{node ? `Nó ${node.id}` : `Nó ${job.node_id}`}</td>
                 </tr>
               );
             })}
             {jobs.length === 0 && (
               <tr>
                 <td
-                  colSpan="4"
+                  colSpan="3"
                   style={{
                     textAlign: "center",
                     padding: "32px",
                     color: "#94a3b8",
                   }}
                 >
-                  Sem dados.
+                  Nenhum job carregado do backend.
                 </td>
               </tr>
             )}
@@ -525,7 +489,7 @@ const JobsPage = ({ jobs, nodes }) => {
   );
 };
 
-// --- WORK DAY PAGE ---
+// Painel "Dia de trabalho"
 const WorkDayPage = ({
   dataset,
   onTopo,
@@ -533,9 +497,9 @@ const WorkDayPage = ({
   onOptimal,
   routeResult,
   topoResult,
-  matrix,
+  startNode,
+  setStartNode,
 }) => {
-  const [activeCell, setActiveCell] = useState(null);
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
       {/* Barra de Ações */}
@@ -544,11 +508,21 @@ const WorkDayPage = ({
         style={{ marginBottom: "0" }}
       >
         <div className="flex-row gap-4 items-center">
+          <div className="flex-row items-center">
+            <span className="label-control">Nó Inicial:</span>
+            <input
+              type="number"
+              className="input-control"
+              value={startNode}
+              onChange={(e) => setStartNode(Number(e.target.value))}
+            />
+          </div>
+
+          <div className="divider-v"></div>
+
           <button onClick={onTopo} className="btn btn-action">
             <GitGraph size={18} /> Validar Precedências
           </button>
-
-          <div className="divider-v"></div>
 
           <button
             onClick={onGreedy}
@@ -583,7 +557,6 @@ const WorkDayPage = ({
       </div>
 
       <div className="grid-layout grid-layout-main">
-        {/* Mapa - Agora ocupando mais espaço se a matriz sumir */}
         <div className="card" style={{ margin: 0, gridColumn: "1 / -1" }}>
           <h3 className="card-title">
             <MapIcon size={20} /> Visualização da Rota
@@ -611,14 +584,10 @@ const WorkDayPage = ({
           {routeResult && (
             <div
               className="mt-4"
-              style={{
-                padding: "16px",
-                backgroundColor: "#F2F6FA",
-                borderRadius: "8px",
-              }}
+              style={{ padding: "16px", backgroundColor: "#F2F6FA", borderRadius: "8px" }}
             >
               <p className="text-sm text-slate-500 mb-4 font-bold">
-                Resumo da Execução:
+                Resumo da execução ({routeResult.strategy}):
               </p>
               <div className="flex-row justify-between items-center">
                 <span
@@ -633,7 +602,7 @@ const WorkDayPage = ({
                     className="text-sm text-slate-500"
                     style={{ fontWeight: "normal" }}
                   >
-                    unidades de tempo
+                    unidades
                   </span>
                 </span>
                 <div style={{ textAlign: "right" }}>
@@ -646,10 +615,7 @@ const WorkDayPage = ({
                   >
                     Ordem dos Jobs
                   </p>
-                  <p
-                    className="font-mono"
-                    style={{ fontWeight: "500", color: "#334155" }}
-                  >
+                  <p className="font-mono" style={{ fontWeight: 500, color: "#334155" }}>
                     {routeResult.job_order.join(" → ")}
                   </p>
                 </div>
@@ -657,55 +623,19 @@ const WorkDayPage = ({
             </div>
           )}
         </div>
-
-        {/* Matriz de Custos - COMENTADA/REMOVIDA DA VISUALIZAÇÃO
-        <div className="card" style={{margin:0, display:'flex', flexDirection:'column', height:'100%'}}>
-          <h3 className="card-title"><Layout size={20}/> Matriz de Custos (C)</h3>
-          <p className="text-xs text-slate-500 mb-4">Clique nas células para ver o caminho.</p>
-          <div style={{flex:1, overflow:'auto'}}>
-            {matrix ? (
-              <table style={{width:'100%', borderCollapse:'collapse'}}>
-                <thead>
-                  <tr>
-                    <th className="matrix-cell matrix-cell-header"></th>
-                    {matrix.nodes.map(n => <th key={n} className="matrix-cell matrix-cell-header">{n}</th>)}
-                  </tr>
-                </thead>
-                <tbody>
-                  {matrix.matrix.map((row, i) => (
-                    <tr key={i}>
-                      <td className="matrix-cell matrix-cell-header">{matrix.nodes[i]}</td>
-                      {row.map((cell, j) => (
-                        <td key={j} 
-                            onClick={() => setActiveCell({from: matrix.nodes[i], to: matrix.nodes[j], val: cell})} 
-                            className={`matrix-cell ${cell === 0 ? 'matrix-cell-empty' : ''}`}>
-                          {cell === null ? '∞' : cell}
-                        </td>
-                      ))}
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            ) : <div style={{display:'flex', alignItems:'center', justifyContent:'center', height:'100px', color:'#cbd5e1'}}>Carregando...</div>}
-          </div>
-          {activeCell && (
-            <div style={{marginTop:'16px', padding:'12px', backgroundColor:'#eff6ff', border:'1px solid #dbeafe', borderRadius:'4px', color:'#1e40af', fontSize:'0.9rem'}}>
-              <strong>Caminho {activeCell.from} → {activeCell.to}:</strong> Custo {activeCell.val}
-            </div>
-          )}
-        </div>
-        */}
       </div>
     </div>
   );
 };
 
-// --- COMPARISON PAGE ---
+// Página de comparação Guloso x Ótimo
 const ComparisonPage = ({
   dataset,
   greedyRes,
   optimalRes,
   onRunComparison,
+  startNode,
+  setStartNode,
 }) => {
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
@@ -716,12 +646,23 @@ const ComparisonPage = ({
         <div>
           <h2 className="card-title">Comparativo de Estratégias</h2>
           <p className="text-slate-500 text-sm">
-            Analise o "Gap de Otimalidade".
+            Analise o “gap de otimalidade” entre Guloso e Ótimo.
           </p>
         </div>
-        <button onClick={onRunComparison} className="btn btn-primary">
-          <Play size={18} /> Executar Comparação
-        </button>
+        <div className="flex-row gap-4 items-center">
+          <div className="flex-row items-center">
+            <span className="label-control">Nó Inicial:</span>
+            <input
+              type="number"
+              className="input-control"
+              value={startNode}
+              onChange={(e) => setStartNode(Number(e.target.value))}
+            />
+          </div>
+          <button onClick={onRunComparison} className="btn btn-primary">
+            <Play size={18} /> Executar Comparação
+          </button>
+        </div>
       </div>
 
       {greedyRes && optimalRes ? (
@@ -741,13 +682,13 @@ const ComparisonPage = ({
                   color: "#334155",
                 }}
               >
-                {greedyRes.total_cost}{" "}
-                <span className="text-xs text-slate-500">s</span>
+                {greedyRes.total_cost.toFixed(1)}{" "}
+                <span className="text-xs text-slate-500">unid.</span>
               </span>
             </div>
             <div
               style={{
-                height: "250px",
+                height: "350px",
                 backgroundColor: "#f8fafc",
                 borderRadius: "8px",
                 border: "1px solid #f1f5f9",
@@ -758,7 +699,7 @@ const ComparisonPage = ({
                 nodes={dataset.nodes}
                 edges={dataset.edges}
                 activeJobs={dataset.jobs}
-                pathEdges={greedyRes.path_edges}
+                pathEdges={greedyRes.path_edges || []}
                 strategyColor={COLORS.greedy}
                 height="100%"
               />
@@ -785,13 +726,13 @@ const ComparisonPage = ({
                   color: "#334155",
                 }}
               >
-                {optimalRes.total_cost}{" "}
-                <span className="text-xs text-slate-500">s</span>
+                {optimalRes.total_cost.toFixed(1)}{" "}
+                <span className="text-xs text-slate-500">unid.</span>
               </span>
             </div>
             <div
               style={{
-                height: "250px",
+                height: "350px",
                 backgroundColor: "#f8fafc",
                 borderRadius: "8px",
                 border: "1px solid #f1f5f9",
@@ -802,7 +743,7 @@ const ComparisonPage = ({
                 nodes={dataset.nodes}
                 edges={dataset.edges}
                 activeJobs={dataset.jobs}
-                pathEdges={optimalRes.path_edges}
+                pathEdges={optimalRes.path_edges || []}
                 strategyColor={COLORS.optimal}
                 height="100%"
               />
@@ -844,13 +785,12 @@ const ComparisonPage = ({
                 Análise do Gap
               </h4>
               <p className="text-sm" style={{ color: "#1E3A5F" }}>
-                {/* MODIFICADO: Exibindo diferença em tempo ao invés de porcentagem */}
                 O algoritmo Guloso foi{" "}
                 <strong>
                   {(greedyRes.total_cost - optimalRes.total_cost).toFixed(1)}{" "}
-                  unidades de tempo
+                  unidades
                 </strong>{" "}
-                mais lento que o Ótimo.
+                mais caro que o Ótimo.
               </p>
             </div>
           </div>
@@ -872,7 +812,7 @@ const ComparisonPage = ({
             style={{ color: "#cbd5e1", marginBottom: "16px" }}
           />
           <p className="text-slate-500">
-            Clique em "Executar Comparação" para rodar os algoritmos.
+            Clique em &quot;Executar Comparação&quot; para rodar os algoritmos.
           </p>
         </div>
       )}
@@ -888,27 +828,53 @@ const ComparisonPage = ({
 const App = () => {
   const [activeTab, setActiveTab] = useState("jobs");
   const [dataset, setDataset] = useState({ nodes: [], edges: [], jobs: [] });
+  const [startNode, setStartNode] = useState(1);
   const [topoResult, setTopoResult] = useState(null);
   const [routeResult, setRouteResult] = useState(null);
-  const [matrix, setMatrix] = useState(null);
   const [loading, setLoading] = useState(false);
   const [compGreedy, setCompGreedy] = useState(null);
   const [compOptimal, setCompOptimal] = useState(null);
 
+  // carrega grafo + jobs ao montar
   useEffect(() => {
-    handleLoadDefault();
-    loadMatrix();
+    fetchInitialData();
   }, []);
 
-  const handleLoadDefault = async () => {
-    // MODIFICADO: Removido o upload para o backend.
-    // Assumimos que o dataset vem do backend ou usamos o mock apenas para inicializar o estado visual.
-    setDataset(MOCK_DATASET);
+  const fetchInitialData = async () => {
+    setLoading(true);
+    const graph = await api.getGraph();
+    const jobs = await api.getJobs();
+    setDataset({
+      nodes: graph.nodes,
+      edges: graph.edges,
+      jobs: jobs || [],
+    });
+    setLoading(false);
   };
 
-  const loadMatrix = async () => {
-    const m = await api.getMatrix();
-    setMatrix(m);
+  // helper que monta os segmentos da rota (path_edges) chamando /graph/path
+  const computePathEdges = async (route, jobs, startNode) => {
+    if (!route || !jobs || jobs.length === 0) return [];
+    const jobNodeMap = new Map(jobs.map((j) => [j.id, j.node_id]));
+
+    const nodeSeq = [startNode];
+    for (const jobId of route.job_order) {
+      const nodeId = jobNodeMap.get(jobId);
+      if (nodeId != null) nodeSeq.push(nodeId);
+    }
+
+    const allEdges = [];
+    for (let i = 0; i < nodeSeq.length - 1; i++) {
+      const from = nodeSeq[i];
+      const to = nodeSeq[i + 1];
+      const pathRes = await api.getPath(from, to);
+      if (!pathRes || !pathRes.reachable || !pathRes.path) continue;
+      const p = pathRes.path;
+      for (let j = 0; j < p.length - 1; j++) {
+        allEdges.push([p[j], p[j + 1]]);
+      }
+    }
+    return allEdges;
   };
 
   const handleTopo = async () => {
@@ -920,18 +886,40 @@ const App = () => {
 
   const handleRunStrategy = async (strategy) => {
     setLoading(true);
-    const res =
-      strategy === "greedy" ? await api.getGreedy(1) : await api.getOptimal(1);
-    setRouteResult(res);
+    const baseRoute =
+      strategy === "greedy"
+        ? await api.getGreedy(startNode)
+        : await api.getOptimal(startNode);
+
+    let withPaths = baseRoute;
+    if (baseRoute && dataset.jobs.length > 0) {
+      const edges = await computePathEdges(baseRoute, dataset.jobs, startNode);
+      withPaths = { ...baseRoute, path_edges: edges };
+    }
+
+    setRouteResult(withPaths);
     setLoading(false);
   };
 
   const handleComparison = async () => {
     setLoading(true);
-    const g = await api.getGreedy(1);
-    const o = await api.getOptimal(1);
-    setCompGreedy(g);
-    setCompOptimal(o);
+    const g = await api.getGreedy(startNode);
+    const o = await api.getOptimal(startNode);
+
+    let gWith = g;
+    let oWith = o;
+
+    if (g && dataset.jobs.length > 0) {
+      const edgesG = await computePathEdges(g, dataset.jobs, startNode);
+      gWith = { ...g, path_edges: edgesG };
+    }
+    if (o && dataset.jobs.length > 0) {
+      const edgesO = await computePathEdges(o, dataset.jobs, startNode);
+      oWith = { ...o, path_edges: edgesO };
+    }
+
+    setCompGreedy(gWith);
+    setCompOptimal(oWith);
     setLoading(false);
   };
 
@@ -939,18 +927,19 @@ const App = () => {
     <>
       <style>{APP_STYLES}</style>
       <div className="app-container">
-        {/* SIDEBAR */}
         <aside className="sidebar">
           <div className="sidebar-header">
             <div className="sidebar-title">
-              <MapIcon size={24} /> RouteOpt
+              <Truck size={24} /> RouteOpt
             </div>
             <div className="sidebar-subtitle">Otimizador Logístico</div>
           </div>
           <nav className="sidebar-nav">
             <button
               onClick={() => setActiveTab("jobs")}
-              className={`btn btn-nav ${activeTab === "jobs" ? "active" : ""}`}
+              className={`btn btn-nav ${
+                activeTab === "jobs" ? "active" : ""
+              }`}
             >
               <Home size={20} /> Jobs
             </button>
@@ -971,9 +960,31 @@ const App = () => {
               <BarChart2 size={20} /> Comparação
             </button>
           </nav>
+          <div className="sidebar-status">
+            <p
+              className="text-xs"
+              style={{ marginBottom: "8px", color: "#A0C4E8" }}
+            >
+              Status do Sistema
+            </p>
+            <div
+              className="flex-row items-center text-xs font-mono"
+              style={{ color: "#86efac" }}
+            >
+              <div
+                style={{
+                  width: "8px",
+                  height: "8px",
+                  backgroundColor: "#4ade80",
+                  borderRadius: "50%",
+                  marginRight: "8px",
+                }}
+              ></div>
+              Online
+            </div>
+          </div>
         </aside>
 
-        {/* MAIN CONTENT */}
         <main className="main-content">
           <header className="header">
             <h2 className="header-title">
@@ -981,7 +992,6 @@ const App = () => {
               {activeTab === "workday" && "Painel Operacional"}
               {activeTab === "compare" && "Análise de Algoritmos"}
             </h2>
-            {/* REMOVIDO BOTÃO DE UPLOAD */}
             <div className="header-actions">
               <div className="avatar">U</div>
             </div>
@@ -999,7 +1009,8 @@ const App = () => {
                 onOptimal={() => handleRunStrategy("optimal")}
                 routeResult={routeResult}
                 topoResult={topoResult}
-                matrix={matrix}
+                startNode={startNode}
+                setStartNode={setStartNode}
               />
             )}
             {activeTab === "compare" && (
@@ -1008,6 +1019,8 @@ const App = () => {
                 greedyRes={compGreedy}
                 optimalRes={compOptimal}
                 onRunComparison={handleComparison}
+                startNode={startNode}
+                setStartNode={setStartNode}
               />
             )}
           </div>
@@ -1031,12 +1044,12 @@ const App = () => {
                     width: "40px",
                     height: "40px",
                     border: "4px solid #f1f5f9",
-                    borderTopColor: "#1E3A5F",
+                    borderTopColor: COLORS.primary,
                     borderRadius: "50%",
                     marginBottom: "16px",
                   }}
                 ></div>
-                <p style={{ fontWeight: "bold", color: "#1E3A5F" }}>
+                <p style={{ fontWeight: "bold", color: COLORS.primary }}>
                   Processando...
                 </p>
               </div>
